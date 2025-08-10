@@ -1,8 +1,4 @@
 <template>
-  <v-btn @click="openCreate" color="green-darken-4"
-    >Adauga o melodie noua</v-btn
-  >
-
   <v-dialog v-model="isActive" :width="600" persistent>
     <v-card>
       <v-toolbar>
@@ -73,7 +69,7 @@
     save,
   } = useSongForm();
 
-  defineExpose({ openEdit });
+  defineExpose({ openCreate, openEdit });
 
   const onSave = async () => {
     const result = await save();

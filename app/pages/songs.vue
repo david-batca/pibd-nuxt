@@ -3,8 +3,13 @@
     <v-sheet
       class="bg-surface rounded-lg pa-4 d-flex align-center justify-space-between mb-10"
       ><h1>Melodii</h1>
-      <SongForm ref="formRef" @saved="onSaved"
-    /></v-sheet>
+
+      <v-btn @click="formRef.openCreate()" color="green-darken-4"
+        >Adauga o melodie noua</v-btn
+      >
+    </v-sheet>
+
+    <SongForm ref="formRef" @saved="onSaved" />
 
     <v-data-table
       :items="songs"
@@ -22,7 +27,7 @@
       <template #item.actions="{ item }">
         <div class="d-flex align-center justify-end">
           <v-btn
-            @click="editSong(item.id)"
+            @click="formRef.openEdit(item.id)"
             color="success"
             variant="text"
             icon="mdi-pencil"
@@ -72,22 +77,19 @@
     if (mode === "create") {
       songs.value = [...songs.value, data];
     } else {
-      console.log({ mode, data });
       songs.value = songs.value.map((song) =>
         song.id === data.id ? data : song
       );
     }
   };
 
-  const editSong = (id) => {
-    formRef.value.openEdit(id);
-  };
-
   const deleteSong = async (id) => {
     try {
-      const response = await $fetch(`/api/songs/${id}`, {
+      const response = await $fetch(`/api/songs/1000`, {
         method: "DELETE",
       });
+
+      // console.log(response);
 
       songs.value = songs.value.filter((song) => song.id !== id);
     } catch (error) {}

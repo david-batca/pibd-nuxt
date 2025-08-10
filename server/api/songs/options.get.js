@@ -4,7 +4,8 @@ export default defineEventHandler(async (event) => {
   const sql = `
     SELECT
       id, name
-    FROM songs;
+    FROM songs
+    ORDER BY id;
   `;
 
   try {

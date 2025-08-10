@@ -1,18 +1,17 @@
 <template>
   <v-dialog v-model="isActive" :width="600" persistent>
-    <template #activator="{ props }">
-      <v-btn v-bind="props" color="green-darken-4">Adauga un artist nou</v-btn>
-    </template>
-
     <v-card>
       <v-toolbar>
-        <v-toolbar-title>Adauga un artist nou</v-toolbar-title>
+        <v-toolbar-title>
+          <span v-if="mode === 'create'">Adauga un artist nou</span>
+          <span v-else>Modifica un artist</span>
+        </v-toolbar-title>
         <v-btn icon="mdi-close" @click="isActive = false"></v-btn>
       </v-toolbar>
 
       <v-card-text class="px-4">
         <v-text-field
-          v-model="name"
+          v-model="formData.name"
           placeholder="Introduceti numele"
           color="success"
           variant="outlined"
@@ -25,7 +24,7 @@
         >
 
         <v-autocomplete
-          v-model="songs"
+          v-model="formData.songs"
           :items="songsOptions"
           item-title="name"
           item-value="id"
@@ -44,7 +43,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-btn @click="addArtist" color="green-darken-4" variant="flat"
+        <v-btn @click="onSave" color="green-darken-4" variant="flat"
           >Salveaza</v-btn
         >
         <v-btn @click="isActive = false" color="red-darken-4" variant="flat"
@@ -56,37 +55,23 @@
 </template>
 
 <script setup>
-  const emit = defineEmits(["appendArtist"]);
-  const isActive = ref(false);
-  const name = ref(null);
-  const songs = ref([]);
-  const errorMessage = ref(null);
+  const emit = defineEmits(["saved"]);
 
   const {
-    data: songsOptions,
-    error,
-    pending,
-  } = await useFetch("/api/songs/options");
+    isActive,
+    mode,
+    formData,
+    errorMessage,
+    songsOptions,
+    openCreate,
+    openEdit,
+    save,
+  } = useArtistForm();
 
-  const addArtist = async () => {
-    errorMessage.value = null;
+  defineExpose({ openCreate, openEdit });
 
-    try {
-      const response = await $fetch("/api/artists", {
-        method: "POST",
-        body: {
-          name: name.value,
-          songs: songs.value,
-        },
-      });
-
-      isActive.value = false;
-      name.value = null;
-      songs.value = [];
-
-      emit("appendArtist", response);
-    } catch (error) {
-      errorMessage.value = error.statusMessage;
-    }
+  const onSave = async () => {
+    const result = await save();
+    emit("saved", result);
   };
 </script>

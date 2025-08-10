@@ -3,8 +3,12 @@
     <v-sheet
       class="bg-surface rounded-lg pa-4 d-flex align-center justify-space-between mb-10"
       ><h1>Artisti</h1>
-      <NewArtistForm @appendArtist="appendArtist"
-    /></v-sheet>
+      <v-btn @click="formRef.openCreate()" color="green-darken-4"
+        >Adauga un artist nou</v-btn
+      >
+    </v-sheet>
+
+    <ArtistForm ref="formRef" @saved="onSaved" />
 
     <v-data-table
       :items="artists"
@@ -22,6 +26,7 @@
       <template #item.actions="{ item }">
         <div class="d-flex align-center justify-end">
           <v-btn
+            @click="formRef.openEdit(item.id)"
             color="success"
             variant="text"
             icon="mdi-pencil"
@@ -44,6 +49,8 @@
 <script setup>
   const { data: artists, error, pending } = await useFetch("/api/artists");
 
+  const formRef = ref(null);
+
   const headers = [
     {
       title: "Id",
@@ -65,8 +72,14 @@
     },
   ];
 
-  const appendArtist = (newArtist) => {
-    artists.value = [...artists.value, newArtist];
+  const onSaved = ({ mode, data }) => {
+    if (mode === "create") {
+      artists.value = [...artists.value, data];
+    } else {
+      artists.value = artists.value.map((artist) =>
+        artist.id === data.id ? data : artist
+      );
+    }
   };
 
   const deleteArtist = async (id) => {

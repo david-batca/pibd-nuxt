@@ -4,6 +4,24 @@ export default defineEventHandler(async (event) => {
   const db = getDb();
 
   try {
+    const existsSql = `
+      SELECT 1 FROM songs
+      WHERE id = $1;
+    `;
+
+    const exists = await db.query(existsSql, [id]);
+
+    if (!exists.rowCount) {
+      return sendError(
+        event,
+        createError({
+          statusCode: 404,
+          statusMessage: "Aceasta melodie nu exista",
+        })
+      );
+    }
+
+    console.log(exists);
     const sql = `
       DELETE FROM songs
       WHERE id = $1

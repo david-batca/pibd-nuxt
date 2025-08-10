@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
           ...artist,
           id: Number(artist.id),
         })),
+        statusMessage: "Artistul a fost creeat cu success!",
       };
     }
 
@@ -66,6 +67,7 @@ export default defineEventHandler(async (event) => {
       id: Number(songId),
       name: body.name,
       artists: [],
+      statusMessage: "Artistul a fost creeat cu success!",
     };
   } catch (error) {
     await client.query("ROLLBACK");
