@@ -5,16 +5,16 @@ export default defineEventHandler(async (event) => {
 
   const sql = `
     SELECT 
-      songs.id,
-      songs.name,
-      artists.id AS artist_id,
-      artists.name AS artist_name
-    FROM songs
+      artists.id,
+      artists.name,
+      songs.id AS song_id,
+      songs.name AS song_name
+    FROM artists
     LEFT JOIN song_artists
-      ON songs.id = song_artists.song_id
-    LEFT JOIN artists
       ON artists.id = song_artists.artist_id
-    ORDER BY songs.id;
+    LEFT JOIN songs
+      ON songs.id = song_artists.song_id
+    ORDER BY artists.id;
   `;
 
   try {
@@ -23,13 +23,11 @@ export default defineEventHandler(async (event) => {
     const result = new Map();
     for (const row of rows) {
       if (!result.has(row.id)) {
-        result.set(row.id, { id: Number(row.id), name: row.name, artists: [] });
+        result.set(row.id, { id: row.id, name: row.name, songs: [] });
       }
 
-      if (row.artist_id) {
-        result
-          .get(row.id)
-          .artists.push({ id: Number(row.artist_id), name: row.artist_name });
+      if (row.song_id) {
+        result.get(row.id).songs.push({ id: row.song_id, name: row.song_name });
       }
     }
 

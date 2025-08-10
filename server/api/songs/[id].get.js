@@ -1,24 +1,22 @@
 import { getDb } from "~~/server/utils/db";
 
 export default defineEventHandler(async (event) => {
+  const { id } = getRouterParams(event);
   const db = getDb();
 
   const sql = `
     SELECT 
       songs.id,
       songs.name,
-      artists.id AS artist_id,
-      artists.name AS artist_name
+      song_artists.artist_id
     FROM songs
     LEFT JOIN song_artists
       ON songs.id = song_artists.song_id
-    LEFT JOIN artists
-      ON artists.id = song_artists.artist_id
-    ORDER BY songs.id;
+    WHERE songs.id = $1
   `;
 
   try {
-    const { rows } = await db.query(sql);
+    const { rows } = await db.query(sql, [id]);
 
     const result = new Map();
     for (const row of rows) {
@@ -27,13 +25,11 @@ export default defineEventHandler(async (event) => {
       }
 
       if (row.artist_id) {
-        result
-          .get(row.id)
-          .artists.push({ id: Number(row.artist_id), name: row.artist_name });
+        result.get(row.id).artists.push(Number(row.artist_id));
       }
     }
 
-    return Array.from(result.values());
+    return Array.from(result.values())[0];
   } catch (error) {
     return sendError(
       event,
